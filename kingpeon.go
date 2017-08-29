@@ -12,10 +12,11 @@ import (
 	kingpin "gopkg.in/alecthomas/kingpin.v2"
 )
 
-// variable so we can mock for testing
-var syscallExec = syscall.Exec
+// type so we can mock out how scripts are executed for testing
+// it defaults to syscall.Exec
+type runner func(string, []string, []string) error
 
-func runDynamicCommand(dynamiccommand *DynamicCommand, t *template.Template) error {
+func runDynamicCommand(run runner, dynamiccommand *DynamicCommand, t *template.Template) error {
 	buf := bytes.NewBufferString("")
 	t, err := t.Parse(dynamiccommand.Script)
 	if err != nil {
@@ -31,7 +32,7 @@ func runDynamicCommand(dynamiccommand *DynamicCommand, t *template.Template) err
 		return err
 	}
 	cmd := []string{"sh", "-c", buf.String()}
-	return syscallExec(bin, cmd, os.Environ())
+	return run(bin, cmd, os.Environ())
 }
 
 // either kingpin.Application or kingpin.CmdClause fit this interface
@@ -57,7 +58,10 @@ func lookupCommand(app *kingpin.Application, command *DynamicCommand) *kingpin.C
 }
 
 func RegisterDynamicCommands(app *kingpin.Application, commands DynamicCommands, t *template.Template) error {
+	return doRegisterDynamicCommands(syscall.Exec, app, commands, t)
+}
 
+func doRegisterDynamicCommands(run runner, app *kingpin.Application, commands DynamicCommands, t *template.Template) error {
 	args := map[string]interface{}{}
 	opts := map[string]interface{}{}
 
@@ -579,7 +583,7 @@ func RegisterDynamicCommands(app *kingpin.Application, commands DynamicCommands,
 		}
 		copy := command
 		cmd.Action(func(_ *kingpin.ParseContext) error {
-			return runDynamicCommand(&copy, t)
+			return runDynamicCommand(run, &copy, t)
 		})
 	}
 	return nil

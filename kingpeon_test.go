@@ -24,16 +24,16 @@ func TestRegisterDynamicCommands(t *testing.T) {
 	tmpl := template.New("test")
 	app := kingpin.New("kingpeon", "Testing Aliases")
 
-	err = RegisterDynamicCommands(app, data.DynamicCommands, tmpl)
-	assert.Nil(t, err)
-
 	var expectedShell string
-	syscallExec = func(bin string, cmd []string, env []string) error {
+	run := func(bin string, cmd []string, env []string) error {
 		assert.Equal(t, "/bin/sh", bin)
 		assert.Equal(t, []string{"sh", "-c", expectedShell}, cmd)
 		assert.NotEmpty(t, env)
 		return nil
 	}
+
+	err = doRegisterDynamicCommands(run, app, data.DynamicCommands, tmpl)
+	assert.Nil(t, err)
 
 	expectedShell = "echo hello world"
 	_, err = app.Parse([]string{"echo"})
