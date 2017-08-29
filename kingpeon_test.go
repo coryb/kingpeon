@@ -67,6 +67,17 @@ func TestRegisterDynamicCommands(t *testing.T) {
 	_, err = app.Parse([]string{"test", "counter", "opt", "--COUNTER", "--COUNTER"})
 	assert.Nil(t, err)
 
+	expectedShell = "echo foo"
+	_, err = app.Parse([]string{"test", "enum", "arg", "foo"})
+	assert.Nil(t, err)
+
+	expectedShell = "echo foo"
+	_, err = app.Parse([]string{"test", "enum", "opt", "--ENUM", "foo"})
+	assert.Nil(t, err)
+
+	_, err = app.Parse([]string{"test", "enum", "opt", "--ENUM", "bogus"})
+	assert.EqualError(t, err, "enum value must be one of foo,bar, got 'bogus'")
+
 	expectedShell = "echo 1.23"
 	_, err = app.Parse([]string{"test", "float32", "arg", "1.23"})
 	assert.Nil(t, err)

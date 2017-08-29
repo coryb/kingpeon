@@ -126,6 +126,20 @@ func RegisterDynamicCommands(app *kingpin.Application, commands DynamicCommands,
 						return nil
 					}).CounterVar(&val)
 				}
+			case ENUM:
+				if opt.Repeat {
+					var val []string
+					cmdFlag.PreAction(func(_ *kingpin.ParseContext) error {
+						opts[opt.Name] = val
+						return nil
+					}).EnumsVar(&val, opt.Enum...)
+				} else {
+					var val string
+					cmdFlag.PreAction(func(_ *kingpin.ParseContext) error {
+						opts[opt.Name] = val
+						return nil
+					}).EnumVar(&val, opt.Enum...)
+				}
 			case FLOAT32:
 				if opt.Repeat {
 					var val []float32
@@ -354,6 +368,20 @@ func RegisterDynamicCommands(app *kingpin.Application, commands DynamicCommands,
 						args[arg.Name] = val
 						return nil
 					}).CounterVar(&val)
+				}
+			case ENUM:
+				if arg.Repeat {
+					var val []string
+					cmdArg.PreAction(func(_ *kingpin.ParseContext) error {
+						args[arg.Name] = val
+						return nil
+					}).EnumsVar(&val, arg.Enum...)
+				} else {
+					var val string
+					cmdArg.PreAction(func(_ *kingpin.ParseContext) error {
+						args[arg.Name] = val
+						return nil
+					}).EnumVar(&val, arg.Enum...)
 				}
 			case FLOAT32:
 				if arg.Repeat {

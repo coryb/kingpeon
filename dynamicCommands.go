@@ -14,6 +14,7 @@ type DynamicCommandOpt struct {
 	Default  interface{}             `yaml:"default,omitempty" json:"default,omitempty"`
 	Hidden   bool                    `yaml:"hidden,omitempty" json:"hidden,omitempty"`
 	Repeat   bool                    `yaml:"repeat,omitempty" json:"repeat,omitempty"`
+	Enum     []string                `yaml:"enum,omitempty" json:"enum,omitempty"`
 }
 
 type DynamicCommandArg struct {
@@ -23,6 +24,7 @@ type DynamicCommandArg struct {
 	Required bool                    `yaml:"required,omitempty" json:"required,omitempty"`
 	Default  interface{}             `yaml:"default,omitempty" json:"default,omitempty"`
 	Repeat   bool                    `yaml:"repeat,omitempty" json:"repeat,omitempty"`
+	Enum     []string                `yaml:"enum,omitempty" json:"enum,omitempty"`
 }
 
 type DynamicCommand struct {
@@ -44,6 +46,7 @@ const (
 	DEFAULT DynamicCommandValueType = iota
 	BOOL
 	COUNTER
+	ENUM
 	FLOAT32
 	FLOAT64
 	INT8
@@ -70,6 +73,8 @@ func (o *DynamicCommandValueType) UnmarshalYAML(unmarshal func(interface{}) erro
 		*o = BOOL
 	case "COUNTER":
 		*o = COUNTER
+	case "ENUM":
+		*o = ENUM
 	case "FLOAT32":
 		*o = FLOAT32
 	case "FLOAT64":

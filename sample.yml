@@ -42,6 +42,28 @@ dynamic-commands:
       - name: COUNTER
         type: COUNTER
         required: true
+  - name: test enum arg
+    help: test enum arg
+    script: |-
+      echo {{args.ENUM}}
+    args:
+      - name: ENUM
+        type: ENUM
+        enum:
+          - foo
+          - bar
+        required: true
+  - name: test enum opt
+    help: test enum opt
+    script: |-
+      echo {{options.ENUM}}
+    options:
+      - name: ENUM
+        type: ENUM
+        enum:
+          - foo
+          - bar
+        required: true
   - name: test float32 arg
     help: test float32 arg
     script: |-
