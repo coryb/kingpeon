@@ -10,9 +10,9 @@ import (
 	yaml "gopkg.in/yaml.v2"
 )
 
-func TestRegisterAliases(t *testing.T) {
+func TestRegisterDynamicCommands(t *testing.T) {
 	data := struct {
-		Aliases []Alias
+		DynamicCommands []DynamicCommand `yaml:"dynamic-commands"`
 	}{}
 
 	config, err := ioutil.ReadFile("./sample.yml")
@@ -21,10 +21,10 @@ func TestRegisterAliases(t *testing.T) {
 	err = yaml.Unmarshal(config, &data)
 	assert.Nil(t, err)
 
-	tmpl := template.New("aliases")
+	tmpl := template.New("test")
 	app := kingpin.New("kingpeon", "Testing Aliases")
 
-	err = RegisterAliases(app, data.Aliases, tmpl)
+	err = RegisterDynamicCommands(app, data.DynamicCommands, tmpl)
 	assert.Nil(t, err)
 
 	var expectedShell string
@@ -139,11 +139,11 @@ func TestRegisterAliases(t *testing.T) {
 	_, err = app.Parse([]string{"test", "string", "opt", "--STRING", "hello"})
 	assert.Nil(t, err)
 
-	expectedShell = "echo map[foo:bar abc:def]"
+	expectedShell = "echo [abc: def][foo: bar]"
 	_, err = app.Parse([]string{"test", "stringmap", "arg", "foo=bar", "abc=def"})
 	assert.Nil(t, err)
 
-	expectedShell = "echo map[foo:bar abc:def]"
+	expectedShell = "echo [abc: def][foo: bar]"
 	_, err = app.Parse([]string{"test", "stringmap", "opt", "--STRINGMAP", "foo=bar", "--STRINGMAP", "abc=def"})
 	assert.Nil(t, err)
 

@@ -15,9 +15,9 @@ import (
 // variable so we can mock for testing
 var syscallExec = syscall.Exec
 
-func runAlias(alias *Alias, t *template.Template) error {
+func runDynamicCommand(dynamiccommand *DynamicCommand, t *template.Template) error {
 	buf := bytes.NewBufferString("")
-	t, err := t.Parse(alias.Script)
+	t, err := t.Parse(dynamiccommand.Script)
 	if err != nil {
 		return err
 	}
@@ -40,8 +40,8 @@ type kingpinAppOrCommand interface {
 	GetCommand(string) *kingpin.CmdClause
 }
 
-func lookupCommand(app *kingpin.Application, alias *Alias) *kingpin.CmdClause {
-	commandWords := strings.Fields(alias.Name)
+func lookupCommand(app *kingpin.Application, command *DynamicCommand) *kingpin.CmdClause {
+	commandWords := strings.Fields(command.Name)
 	var appOrCmd kingpinAppOrCommand = app
 	if len(commandWords) > 1 {
 		for _, name := range commandWords[0 : len(commandWords)-1] {
@@ -53,10 +53,10 @@ func lookupCommand(app *kingpin.Application, alias *Alias) *kingpin.CmdClause {
 		}
 	}
 
-	return appOrCmd.Command(commandWords[len(commandWords)-1], alias.Help)
+	return appOrCmd.Command(commandWords[len(commandWords)-1], command.Help)
 }
 
-func RegisterAliases(app *kingpin.Application, aliases Aliases, t *template.Template) error {
+func RegisterDynamicCommands(app *kingpin.Application, commands DynamicCommands, t *template.Template) error {
 
 	args := map[string]interface{}{}
 	opts := map[string]interface{}{}
@@ -70,21 +70,21 @@ func RegisterAliases(app *kingpin.Application, aliases Aliases, t *template.Temp
 		},
 	})
 
-	for _, alias := range aliases {
-		cmd := lookupCommand(app, &alias)
-		for _, alt := range alias.AltNames {
+	for _, command := range commands {
+		cmd := lookupCommand(app, &command)
+		for _, alt := range command.Aliases {
 			cmd = cmd.Alias(alt)
 		}
 
-		if alias.Default {
+		if command.Default {
 			cmd = cmd.Default()
 		}
 
-		if alias.Hidden {
+		if command.Hidden {
 			cmd = cmd.Hidden()
 		}
 
-		for _, opt := range alias.Options {
+		for _, opt := range command.Options {
 			cmdFlag := cmd.Flag(opt.Name, opt.Help)
 			if opt.Short != "" {
 				cmdFlag.Short(rune(opt.Short[0]))
@@ -321,7 +321,7 @@ func RegisterAliases(app *kingpin.Application, aliases Aliases, t *template.Temp
 			}
 		}
 
-		for _, arg := range alias.Args {
+		for _, arg := range command.Args {
 			cmdArg := cmd.Arg(arg.Name, arg.Help)
 			if arg.Required {
 				cmdArg.Required()
@@ -549,9 +549,9 @@ func RegisterAliases(app *kingpin.Application, aliases Aliases, t *template.Temp
 				}
 			}
 		}
-		copy := alias
+		copy := command
 		cmd.Action(func(_ *kingpin.ParseContext) error {
-			return runAlias(&copy, t)
+			return runDynamicCommand(&copy, t)
 		})
 	}
 	return nil

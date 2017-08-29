@@ -1,4 +1,4 @@
-aliases:
+dynamic-commands:
   - name: echo
     help: echo stuff
     script: |-
@@ -171,7 +171,7 @@ aliases:
   - name: test stringmap arg
     help: test stringmap arg
     script: |-
-      echo {{args.STRINGMAP}}
+      echo {{range $key, $val := args.STRINGMAP}}[{{$key}}: {{$val}}]{{end}}
     args:
       - name: STRINGMAP
         type: STRINGMAP
@@ -179,7 +179,7 @@ aliases:
   - name: test stringmap opt
     help: test stringmap opt
     script: |-
-      echo {{options.STRINGMAP}}
+      echo {{range $key, $val := options.STRINGMAP}}[{{$key}}: {{$val}}]{{end}}
     options:
       - name: STRINGMAP
         type: STRINGMAP
