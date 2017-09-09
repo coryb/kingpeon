@@ -366,3 +366,12 @@ func TestCombinationEnumOptions(t *testing.T) {
 	assert.Equal(t, []string{"opt5", "opt6"}, args)
 
 }
+
+func TestFlagStringVar(t *testing.T) {
+	app := newTestApp()
+	s := "dummy"
+	b := app.Flag("s", "").StrinvVar(&s)
+	_, err := app.Parse([]string{"--s", ""})
+	assert.NoError(t, err)
+	assert.Equal(t, "", s)
+}
