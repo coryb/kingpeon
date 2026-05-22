@@ -54,6 +54,11 @@ func lookupCommand(app *kingpin.Application, command *DynamicCommand) *kingpin.C
 		}
 	}
 
+	// return the previously created command if it exists.
+	if tmp := appOrCmd.GetCommand(commandWords[len(commandWords)-1]); tmp != nil {
+		return tmp
+	}
+
 	return appOrCmd.Command(commandWords[len(commandWords)-1], command.Help)
 }
 
